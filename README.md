@@ -1,4 +1,4 @@
-# Study coverage of the Arabidopsis thaliana radA mutant on cpDNA
+# Study recombination of the Arabidopsis thaliana radA mutant on cpDNA
 
 Materials
 
