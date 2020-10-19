@@ -16,6 +16,34 @@ radA-3: ERR4686479
 
 radA-4: ERR4686480
 
+Mapping bam files containing only reads with a short-clipped sequences are available on ebi.ac.uk/ena under the accession numbers:
+
+WT1: NA
+
+WT2: NA
+
+radA-1: NA
+
+radA-2: NA
+
+radA-3: NA
+
+radA-4: NA
+
+Short-clipped fastq sequences are available on ebi.ac.uk/ena under the accession numbers:
+
+WT1: NA
+
+WT2: NA
+
+radA-1: NA
+
+radA-2: NA
+
+radA-3: NA
+
+radA-4: NA
+
 Methods
 
 Illumina sequencing
@@ -24,4 +52,4 @@ In this study Illumina paired-end short reads sequencing strategy was used to de
 
 Coverage analysis
 
-For Illumina sequence analysis of the cpDNA, reads were aligned against the Arabidopsis reference genomes using BWA and filtered to keep only those mapping to the cpDNA. For analysis of rearranged sequences, reads properly pairing to the cpDNA were filtered to only keep those showing a short-clipping sequence (threshold 20 nucleotides) and no indel (looking for the presence of an S in the CIGAR string without any I, D and H). The short-clipping sequences were then extracted with SE-MEI/extractSoftclipped (github.com/dpryan79/SE-MEI) and aligned using bowtie2 (Langmead et Salzberg, 2012) against the cpDNA. The positions of the short-clipping sequences mapping the cpDNA and of their relative read were rounded down to the upper kb to analyze the localization of the rearrangement. Those corresponding to the isomerization that results from the recombination involving the large inverted repeats were filtered out.
+For Illumina sequence analysis of the cpDNA, reads were aligned against the Arabidopsis reference genomes using BWA and filtered to keep only those mapping to the cpDNA. For analysis of rearranged sequences, reads properly pairing to the cpDNA were filtered to only keep those showing a short-clipping sequence (threshold 20 nucleotides) and no indel (looking for the presence of an S in the CIGAR string without any I, D and H). The short-clipping sequences were then extracted with SE-MEI/extractSoftclipped (github.com/dpryan79/SE-MEI) and aligned using bowtie2 against the cpDNA (see JGAF-Atha_cpDNA_SoftClipped.sh). The positions of the short-clipping sequences mapping the cpDNA and of their relative read were rounded down to the upper kb to analyze the localization of the rearrangement (see JGAF-Atha_cpDNA_SoftClipped.R). Those corresponding to the isomerization that results from the recombination involving the large inverted repeats were filtered out.
