@@ -4,17 +4,12 @@
 
 ### Raw reads fastq files are available on ebi.ac.uk/ena under the accession numbers:
 
-WT1: ERR4686393
-
-WT2: ERR4686394
-
-radA-1: ERR4686477
-
-radA-2: ERR4686478
-
-radA-3: ERR4686479
-
-radA-4: ERR4686480
+WT1: ERR4686393  
+WT2: ERR4686394  
+radA-1: ERR4686477  
+radA-2: ERR4686478  
+radA-3: ERR4686479  
+radA-4: ERR4686480  
 
 ### Mapping bam files containing only reads with a short-clipped sequences are available on ebi.ac.uk/ena under the accession numbers:
 
