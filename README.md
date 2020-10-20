@@ -1,8 +1,8 @@
 # Study recombination of the Arabidopsis thaliana radA mutant on cpDNA
 
-Materials
+## Materials
 
-Raw reads fastq files are available on ebi.ac.uk/ena under the accession numbers:
+### Raw reads fastq files are available on ebi.ac.uk/ena under the accession numbers:
 
 WT1: ERR4686393
 
@@ -16,7 +16,7 @@ radA-3: ERR4686479
 
 radA-4: ERR4686480
 
-Mapping bam files containing only reads with a short-clipped sequences are available on ebi.ac.uk/ena under the accession numbers:
+### Mapping bam files containing only reads with a short-clipped sequences are available on ebi.ac.uk/ena under the accession numbers:
 
 WT1: ERR4695569
 
@@ -30,7 +30,7 @@ radA-3: ERR4695871
 
 radA-4: ERR4695872
 
-Short-clipped fastq sequences are available on ebi.ac.uk/ena under the accession numbers:
+### Short-clipped fastq sequences are available on ebi.ac.uk/ena under the accession numbers:
 
 WT1: ERR4695865
 
@@ -44,7 +44,7 @@ radA-3: ERR4695863
 
 radA-4: ERR4695864
 
-Methods
+## Methods
 
 Illumina sequencing
 
