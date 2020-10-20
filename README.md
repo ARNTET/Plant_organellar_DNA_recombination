@@ -13,21 +13,21 @@
 
 ### Mapping bam files containing only reads with a short-clipped sequences are available on ebi.ac.uk/ena under the accession numbers:
 
-WT1: ERR4695569  
-WT2: ERR4695570  
-radA-1: ERR4695869  
-radA-2: ERR4695870  
-radA-3: ERR4695871  
-radA-4: ERR4695872
+- WT1: ERR4695569  
+- WT2: ERR4695570  
+- radA-1: ERR4695869  
+- radA-2: ERR4695870  
+- radA-3: ERR4695871  
+- radA-4: ERR4695872
 
 ### Short-clipped fastq sequences are available on ebi.ac.uk/ena under the accession numbers:
 
-WT1: ERR4695865  
-WT2: ERR4695866  
-radA-1: ERR4695861  
-radA-2: ERR4695862  
-radA-3: ERR4695863  
-radA-4: ERR4695864
+- WT1: ERR4695865  
+- WT2: ERR4695866  
+- radA-1: ERR4695861  
+- radA-2: ERR4695862  
+- radA-3: ERR4695863  
+- radA-4: ERR4695864
 
 ## Methods
 
