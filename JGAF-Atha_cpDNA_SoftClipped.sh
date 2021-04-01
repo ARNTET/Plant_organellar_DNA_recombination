@@ -1,262 +1,117 @@
 #!/bin/bash
-#SBATCH --partition=fast
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=2000
-#SBATCH --job-name=recombination
-#SBATCH --output=JGAF-recombination-%j.out
 
 # Modules needed ###############################################################
 module load bwa
 module load samtools
+module load bedtools
+module load extractSoftclipped
 module load bowtie2
 
-# WT-1 #####################################################################
-bwa mem -t 16 \
-Atha_cpDNA.fasta \
-JGAF-WT-1_R1.fq \
-JGAF-WT-1_R2.fq \
-> JGAF-WT-1_cpDNA_mapped.sam
-samtools view -b -F4 \
-JGAF-WT-1_cpDNA_mapped.sam \
-> JGAF-WT-1_cpDNA_mapped.unsorted.bam
-samtools view \
--h JGAF-WT-1_cpDNA_mapped.unsorted.bam \
-| awk '{if($0 ~ /^@/ || $6 ~ /S/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /I/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /D/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /H/) {print $0}}' \
-| samtools view -Sb - > JGAF-WT-1_cpDNA_mapped.SC.unsorted.bam
-samtools sort \
-JGAF-WT-1_cpDNA_mapped.SC.unsorted.bam \
-> JGAF-WT-1_cpDNA_mapped.SC.bam
-SE-MEI/extractSoftclipped \
-JGAF-WT-1_cpDNA_mapped.SC.bam \
-> JGAF-WT-1.SC.fq.gz
-gunzip JGAF-WT-1.SC.fq.gz
-awk \
-'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= 20) {print header, seq, qheader, qseq}}' \
-< ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-WT-1.SC.fq > ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-WT-1.SC.flt.fq
-bowtie2 \
---no-mixed \
--x Atha_cpDNA.bt2 \
--U JGAF-WT-1.SC.flt.fq \
--S JGAF-WT-1.SC.sam
-samtools view -b \
-JGAF-WT-1.SC.sam \
-> JGAF-WT-1.SC.unsorted.bam
-samtools sort  \
-JGAF-WT-1.SC.unsorted.bam \
-> JGAF-WT-1.SC.bam
-samtools view -b \
-JGAF-WT-1.SC.bam \
-> JGAF-WT-1.SC.sam
+# /!\ To fill /!\ ##############################################################
+samples=()
+genomes=() #ex: mtDNA cpDNA
+lengthS=${#samples[@]}
+lengthG=${#genomes[@]}
+adapters=
 
-# WT-2 #####################################################################
-bwa mem -t 16 \
-Atha_cpDNA.fasta \
-JGAF-WT-2_R1.fq \
-JGAF-WT-2_R2.fq \
-> JGAF-WT-2_cpDNA_mapped.sam
-samtools view -b -F4 \
-JGAF-WT-2_cpDNA_mapped.sam \
-> JGAF-WT-2_cpDNA_mapped.unsorted.bam
-samtools view \
--h JGAF-WT-2_cpDNA_mapped.unsorted.bam \
-| awk '{if($0 ~ /^@/ || $6 ~ /S/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /I/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /D/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /H/) {print $0}}' \
-| samtools view -Sb - > JGAF-WT-2_cpDNA_mapped.SC.unsorted.bam
-samtools sort \
-JGAF-WT-2_cpDNA_mapped.SC.unsorted.bam \
-> JGAF-WT-2_cpDNA_mapped.SC.bam
-SE-MEI/extractSoftclipped \
-JGAF-WT-2_cpDNA_mapped.SC.bam \
-> JGAF-WT-2.SC.fq.gz
-gunzip JGAF-WT-2.SC.fq.gz
-awk \
-'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= 20) {print header, seq, qheader, qseq}}' \
-< ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-WT-2.SC.fq > ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-WT-2.SC.flt.fq
-bowtie2 \
---no-mixed \
--x Atha_cpDNA.bt2 \
--U JGAF-WT-2.SC.flt.fq \
--S JGAF-WT-2.SC.sam
-samtools view -b \
-JGAF-WT-2.SC.sam \
-> JGAF-WT-2.SC.unsorted.bam
-samtools sort  \
-JGAF-WT-2.SC.unsorted.bam \
-> JGAF-WT-2.SC.bam
-samtools view -b \
-JGAF-WT-2.SC.bam \
-> JGAF-WT-2.SC.sam
+# Genomes indexing #############################################################
+G=0
+while (($G<$lengthG)); do
+  bwa index ${genomes[G]}".fasta"
+  bowtie2-build ${genomes[G]}".fasta" ${genomes[G]}".bt2"
+  let "G=G+1"
+done
 
-# radA-1-1 #####################################################################
-bwa mem -t 16 \
-Atha_cpDNA.fasta \
-JGAF-radA-1-1_R1.fq \
-JGAF-radA-1-1_R2.fq \
-> JGAF-radA-1-1_cpDNA_mapped.sam
-samtools view -b -F4 \
-JGAF-radA-1-1_cpDNA_mapped.sam \
-> JGAF-radA-1-1_cpDNA_mapped.unsorted.bam
-samtools view \
--h JGAF-radA-1-1_cpDNA_mapped.unsorted.bam \
-| awk '{if($0 ~ /^@/ || $6 ~ /S/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /I/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /D/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /H/) {print $0}}' \
-| samtools view -Sb - > JGAF-radA-1-1_cpDNA_mapped.SC.unsorted.bam
-samtools sort \
-JGAF-radA-1-1_cpDNA_mapped.SC.unsorted.bam \
-> JGAF-radA-1-1_cpDNA_mapped.SC.bam
-SE-MEI/extractSoftclipped \
-JGAF-radA-1-1_cpDNA_mapped.SC.bam \
-> JGAF-radA-1-1.SC.fq.gz
-gunzip JGAF-radA-1-1.SC.fq.gz
-awk \
-'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= 20) {print header, seq, qheader, qseq}}' \
-< ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-radA-1-1.SC.fq > ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-radA-1-1.SC.flt.fq
-bowtie2 \
---no-mixed \
--x Atha_cpDNA.bt2 \
--U JGAF-radA-1-1.SC.flt.fq \
--S JGAF-radA-1-1.SC.sam
-samtools view -b \
-JGAF-radA-1-1.SC.sam \
-> JGAF-radA-1-1.SC.unsorted.bam
-samtools sort  \
-JGAF-radA-1-1.SC.unsorted.bam \
-> JGAF-radA-1-1.SC.bam
-samtools view -b \
-JGAF-radA-1-1.SC.bam \
-> JGAF-radA-1-1.SC.sam
-
-# radA-1-2 #####################################################################
-bwa mem -t 16 \
-Atha_cpDNA.fasta \
-JGAF-radA-1-2_R1.fq \
-JGAF-radA-1-2_R2.fq \
-> JGAF-radA-1-2_cpDNA_mapped.sam
-samtools view -b -F4 \
-JGAF-radA-1-2_cpDNA_mapped.sam \
-> JGAF-radA-1-2_cpDNA_mapped.unsorted.bam
-samtools view \
--h JGAF-radA-1-2_cpDNA_mapped.unsorted.bam \
-| awk '{if($0 ~ /^@/ || $6 ~ /S/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /I/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /D/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /H/) {print $0}}' \
-| samtools view -Sb - > JGAF-radA-1-2_cpDNA_mapped.SC.unsorted.bam
-samtools sort \
-JGAF-radA-1-2_cpDNA_mapped.SC.unsorted.bam \
-> JGAF-radA-1-2_cpDNA_mapped.SC.bam
-SE-MEI/extractSoftclipped \
-JGAF-radA-1-2_cpDNA_mapped.SC.bam \
-> JGAF-radA-1-2.SC.fq.gz
-gunzip JGAF-radA-1-2.SC.fq.gz
-awk \
-'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= 20) {print header, seq, qheader, qseq}}' \
-< ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-radA-1-2.SC.fq > ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-radA-1-2.SC.flt.fq
-bowtie2 \
---no-mixed \
--x Atha_cpDNA.bt2 \
--U JGAF-radA-1-2.SC.flt.fq \
--S JGAF-radA-1-2.SC.sam
-samtools view -b \
-JGAF-radA-1-2.SC.sam \
-> JGAF-radA-1-2.SC.unsorted.bam
-samtools sort  \
-JGAF-radA-1-2.SC.unsorted.bam \
-> JGAF-radA-1-2.SC.bam
-samtools view -b \
-JGAF-radA-1-2.SC.bam \
-> JGAF-radA-1-2.SC.sam
-
-# radA-1-3 #####################################################################
-bwa mem -t 16 \
-Atha_cpDNA.fasta \
-JGAF-radA-1-3_R1.fq \
-JGAF-radA-1-3_R2.fq \
-> JGAF-radA-1-3_cpDNA_mapped.sam
-samtools view -b -F4 \
-JGAF-radA-1-3_cpDNA_mapped.sam \
-> JGAF-radA-1-3_cpDNA_mapped.unsorted.bam
-samtools view \
--h JGAF-radA-1-3_cpDNA_mapped.unsorted.bam \
-| awk '{if($0 ~ /^@/ || $6 ~ /S/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /I/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /D/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /H/) {print $0}}' \
-| samtools view -Sb - > JGAF-radA-1-3_cpDNA_mapped.SC.unsorted.bam
-samtools sort \
-JGAF-radA-1-3_cpDNA_mapped.SC.unsorted.bam \
-> JGAF-radA-1-3_cpDNA_mapped.SC.bam
-SE-MEI/extractSoftclipped \
-JGAF-radA-1-3_cpDNA_mapped.SC.bam \
-> JGAF-radA-1-3.SC.fq.gz
-gunzip JGAF-radA-1-3.SC.fq.gz
-awk \
-'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= 20) {print header, seq, qheader, qseq}}' \
-< ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-radA-1-3.SC.fq > ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-radA-1-3.SC.flt.fq
-bowtie2 \
---no-mixed \
--x Atha_cpDNA.bt2 \
--U JGAF-radA-1-3.SC.flt.fq \
--S JGAF-radA-1-3.SC.sam
-samtools view -b \
-JGAF-radA-1-3.SC.sam \
-> JGAF-radA-1-3.SC.unsorted.bam
-samtools sort  \
-JGAF-radA-1-3.SC.unsorted.bam \
-> JGAF-radA-1-3.SC.bam
-samtools view -b \
-JGAF-radA-1-3.SC.bam \
-> JGAF-radA-1-3.SC.sam
-
-# radA-1-4 #####################################################################
-bwa mem -t 16 \
-Atha_cpDNA.fasta \
-JGAF-radA-1-4_R1.fq \
-JGAF-radA-1-4_R2.fq \
-> JGAF-radA-1-4_cpDNA_mapped.sam
-samtools view -b -F4 \
-JGAF-radA-1-4_cpDNA_mapped.sam \
-> JGAF-radA-1-4_cpDNA_mapped.unsorted.bam
-samtools view \
--h JGAF-radA-1-4_cpDNA_mapped.unsorted.bam \
-| awk '{if($0 ~ /^@/ || $6 ~ /S/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /I/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /D/) {print $0}}' \
-| awk '{if($0 ~ /^@/ || $6 !~ /H/) {print $0}}' \
-| samtools view -Sb - > JGAF-radA-1-4_cpDNA_mapped.SC.unsorted.bam
-samtools sort \
-JGAF-radA-1-4_cpDNA_mapped.SC.unsorted.bam \
-> JGAF-radA-1-4_cpDNA_mapped.SC.bam
-SE-MEI/extractSoftclipped \
-JGAF-radA-1-4_cpDNA_mapped.SC.bam \
-> JGAF-radA-1-4.SC.fq.gz
-gunzip JGAF-radA-1-4.SC.fq.gz
-awk \
-'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= 20) {print header, seq, qheader, qseq}}' \
-< ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-radA-1-4.SC.fq > ARA_RADA_SOFT/SOFT_CLIPPED/JGAF-radA-1-4.SC.flt.fq
-bowtie2 \
---no-mixed \
--x Atha_cpDNA.bt2 \
--U JGAF-radA-1-4.SC.flt.fq \
--S JGAF-radA-1-4.SC.sam
-samtools view -b \
-JGAF-radA-1-4.SC.sam \
-> JGAF-radA-1-4.SC.unsorted.bam
-samtools sort  \
-JGAF-radA-1-4.SC.unsorted.bam \
-> JGAF-radA-1-4.SC.bam
-samtools view -b \
-JGAF-radA-1-4.SC.bam \
-> JGAF-radA-1-4.SC.sam
-
-# Extract Soft clips positions and sequences####################################
-for f in *.sam; do
-    mv -- "$f" "${f%.sam}.txt"
+# Step one #####################################################################
+S=0
+mkdir coverage
+mkdir recombination
+mkdir a_trimmed
+mkdir b_joined
+mkdir c_mappingB
+mkdir d_SC
+mkdir e_SCfiltering
+mkdir g_mappingBt
+while (($S<$lengthS)); do
+  G=0
+  #A# Trimming
+  trimmomatic \
+  PE \
+  ${samples[a]}"_R1.fastq.gz" \
+  ${samples[a]}"_R2.fastq.gz" \
+  a_trimmed/${samples[a]}".R1.fq.gz" \
+  a_trimmed/${samples[a]}".R1U.fq.gz" \
+  a_trimmed/${samples[a]}".R2.fq.gz" \
+  a_trimmed/${samples[a]}".R2U.fq.gz" \
+  ILLUMINACLIP:$adapters:2:30:10 SLIDINGWINDOW:4:15 MINLEN:75
+  #B# Merging overlaping reads
+  fastq-join \
+  ${samples[S]}"_R1.fastq" \
+  ${samples[S]}"_R2.fastq" \
+  -o b_joined/${samples[S]}"_R1.fj.fastq" \
+  -o b_joined/${samples[S]}"_R2.fj.fastq" \
+  -o b_joined/${samples[S]}"_joined.fj.fastq"
+  gzip b_joined/${samples[S]}"_R1.fj.fastq"
+  gzip b_joined/${samples[S]}"_R2.fj.fastq"
+  gzip b_joined/${samples[S]}"_joined.fj.fastq"
+  while (($G<$lengthG)); do
+    #C# Mapping reads on reference genome
+    bwa mem -t 16 \
+    ${genomes[G]}".fasta" \
+    b_joined/${samples[S]}"_R1.fj.fastq.gz" \
+    b_joined/${samples[S]}"_R2.fj.fastq.gz" \
+    > c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.sam"
+    samtools view -b -f2\
+    c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.sam" \
+    > c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.bam"
+    samtools sort \
+    c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.bam" \
+    > c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.cov.bam"
+    #D.1# Exctracting coverage data
+    bedtools genomecov \
+    -ibam c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.cov.bam" \
+    -bg \
+    > coverage/${samples[S]}"_"${genomes[G]}"_mapped.cov.txt"
+    #D.2# Filtering bam file to keep reads with shortclips but without indel and hardcliping
+    samtools view \
+    -h c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.cov.bam" \
+    | awk '{if($0 ~ /^@/ || $6 ~ /S/) {print $0}}' \
+    | awk '{if($0 ~ /^@/ || $6 !~ /I/) {print $0}}' \
+    | awk '{if($0 ~ /^@/ || $6 !~ /D/) {print $0}}' \
+    | awk '{if($0 ~ /^@/ || $6 !~ /H/) {print $0}}' \
+    | samtools view -Sb - > d_SC/${samples[S]}"_"${genomes[G]}"_mapped.US.bam"
+    samtools sort \
+    d_SC/${samples[S]}"_"${genomes[G]}"_mapped.US.bam" \
+    > d_SC/${samples[S]}"_"${genomes[G]}"_mapped.SC.bam"
+    #E# Exctracting softclip sequences
+    ~/SE-MEI/extractSoftclipped \
+    d_SC/${samples[S]}"_"${genomes[G]}"_mapped.SC.bam" \
+    > e_SCfiltering/${samples[S]}"_"${genomes[G]}"_SC.fq.gz"
+    gunzip e_SCfiltering/${samples[S]}"_"${genomes[G]}"_SC.fq.gz"
+    #F# Filtering softclip sequences (SC>20 bases)
+    awk \
+    'BEGIN {FS = "\t" ; OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= 20) {print header, seq, qheader, qseq}}' \
+    < e_SCfiltering/${samples[S]}"_"${genomes[G]}"_SC.fq" \
+    > e_SCfiltering/${samples[S]}"_"${genomes[G]}"_SC.flt.fq"
+    #G# Mapping softclip sequences on reference genome
+    bowtie2 \
+    --no-mixed \
+    -x "Atha_"${genomes[G]}".bt2" \
+    -U e_SCfiltering/${samples[S]}"_"${genomes[G]}"_SC.flt.fq" \
+    -S g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.sam"
+    samtools view -b \
+    g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.sam" \
+    > g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.US.bam"
+    samtools sort  \
+    g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.US.bam" \
+    > g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.bam"
+    #H# Bam file convertion to .txt to study it with R
+    samtools view \
+    g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.bam" \
+    > recombination/${samples[S]}"_"${genomes[G]}".SC.txt"
+    let "G=G+1"
+  done
+  let "S=S+1"
 done
