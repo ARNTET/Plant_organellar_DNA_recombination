@@ -3,6 +3,8 @@
 #SBATCH --mem-per-cpu=2000
 
 # Modules needed ###############################################################
+module load trimmomatic
+module load fastq-join
 module load bwa
 module load samtools
 module load bedtools
