@@ -103,7 +103,7 @@ while (($S<$lengthS)); do
     -x "Atha_"${genomes[G]}".bt2" \
     -U e_SCfiltering/${samples[S]}"_"${genomes[G]}"_SC.flt.fq" \
     -S g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.sam"
-    samtools view -b \
+    samtools view -b -F4 \
     g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.sam" \
     > g_mappingBt/${samples[S]}"_"${genomes[G]}".SC.US.bam"
     samtools sort  \
