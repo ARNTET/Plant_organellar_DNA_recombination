@@ -13,7 +13,10 @@ module load bowtie2
 
 # /!\ To fill /!\ ##############################################################
 samples=()
-genomes=() #ex: mtDNA cpDNA
+mtDNA=
+cpDNA=
+nuDNA= #needed for normalization of coverage
+genomes=($mtDNA $cpDNA $nuDNA)
 lengthS=${#samples[@]}
 lengthG=${#genomes[@]}
 adapters=
@@ -37,7 +40,6 @@ mkdir d_SC
 mkdir e_SCfiltering
 mkdir g_mappingBt
 while (($S<$lengthS)); do
-  G=0
   #A# Trimming
   trimmomatic \
   PE \
@@ -58,19 +60,27 @@ while (($S<$lengthS)); do
   gzip b_joined/${samples[S]}"_R1.fj.fastq"
   gzip b_joined/${samples[S]}"_R2.fj.fastq"
   gzip b_joined/${samples[S]}"_joined.fj.fastq"
+  G=0
+  #C# Mapping reads on references genomes
   while (($G<$lengthG)); do
-    #C# Mapping reads on reference genome
     bwa mem -t 16 \
     ${genomes[G]}".fasta" \
     b_joined/${samples[S]}"_R1.fj.fastq.gz" \
     b_joined/${samples[S]}"_R2.fj.fastq.gz" \
     > c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.sam"
-    samtools view -b -f2\
+    samtools view -b -f2 \
     c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.sam" \
     > c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.bam"
     samtools sort \
     c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.bam" \
     > c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.cov.bam"
+    samtools view -c \
+    c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.cov.bam" \
+    > ${samples[S]}"_"${genomes[G]}"_readsCount.txt"
+    let "G=G+1"
+  done
+  G=0
+  while (($G<$(($lengthS-1)))); do #Here we don't need nuclear data
     #D.1# Exctracting coverage data
     bedtools genomecov \
     -ibam c_mappingB/${samples[S]}"_"${genomes[G]}"_mapped.cov.bam" \
