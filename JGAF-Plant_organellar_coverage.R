@@ -23,20 +23,26 @@ cov <- data.table()
 while (S <= length(samples)) {
   covG <- data.table()
   G <- 1
+  Sx <- 0
+  #A# Determination of number of mapped reads per sample on all genomes
+  while (G <= length(genomes)) {
+    Sa <- paste(samples[S],genomes[G], sep="_")
+    Sc <- paste(Sa, "_readsCount.txt", sep="")
+    Sd <- fread(Sc, fill = TRUE)
+    Sx <- Sx + Sd$V1[1]}
+  G <- 1
   while (G <= length(genomes)) {
     Sa <- paste(samples[S],genomes[G], sep="_")
     Sb <- paste(Sa, '_mapped.cov.txt', sep="")
     Se <- fread(Sb, fill = TRUE)
-    Sc <- paste(Sa, "_readsCount.txt", sep="")
-    Sd <- fread(Sc, fill = TRUE)
-    #A# Normalization to 1'000'000 reads mapped
-    Se$V5 <- ceiling(Se$V4*(1000000/Sd$V1[1]))
-    #B# Defining limits for according to genomes  
+    #B# Normalization to 1'000'000 reads mapped
+    Se$V5 <- ceiling(Se$V4*(1000000/Sx))
+    #C# Defining limits for according to genomes  
     if (G %% 2 == 0) {
       genomeLimit <- 129}
     else{
       genomeLimit <- 370}
-    #C# Mean coverage of each 1 kb-range
+    #D# Mean coverage of each 1 kb-range
     a = 0
     b = 1000
     Se_kbCov <- data.table()
@@ -47,7 +53,7 @@ while (S <= length(samples)) {
       a = a + 1000
       b = b + 1000}
     write.table(Se_kbCov,paste(Sa, '.kbNrmlzCov.csv', sep=""), row.names = TRUE, sep = ";")
-    #D# Building coverage table needed in JGAF-Plant_organellar_recombination.R
+    #E# Building coverage table needed in JGAF-Plant_organellar_recombination.R
     Sf <- data.table(mean(Se$V5))
     covG <- rbind(covG,Sf)
     G <- G+1}
