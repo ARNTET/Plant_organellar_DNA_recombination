@@ -1,7 +1,7 @@
 # Pipeline of analysis for recombination of organellar genomes
 
 ## Introduction
-This pipeline was initialy built for Chevigny et al., 2020 and aims to analyze recombination of organellar genomes from Illumina paired-end data (2 × 150 bp). To have an overview of this pipeline, please refer to Graphical_summary_PlantOrgRec.pdf 
+This pipeline was initialy built for Chevigny et al., 2022 and aims to analyze recombination of organellar genomes from Illumina paired-end data (2 × 150 bp). To have an overview of this pipeline, please refer to Graphical_summary_PlantOrgRec.pdf 
 
 ## Methods
 ### Data pre-processing
